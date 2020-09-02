@@ -178,7 +178,10 @@ static void fl_view_get_property(GObject* object,
 static void fl_view_notify(GObject* object, GParamSpec* pspec) {
   FlView* self = FL_VIEW(object);
 
-  if (strcmp(pspec->name, "scale-factor") == 0) {
+  if (
+    strcmp(pspec->name, "scale-factor") == 0 ||
+    strcmp(pspec->name, "has-focus") == 0
+  ) {
     fl_view_geometry_changed(self);
   }
 
@@ -333,6 +336,15 @@ static gboolean fl_view_key_release_event(GtkWidget* widget,
   return TRUE;
 }
 
+static gboolean fl_view_draw_event(GtkWidget* widget,
+                               cairo_t *cr) {
+  FlView* self = FL_VIEW(widget);
+
+  fl_view_geometry_changed(self);
+
+  return TRUE;
+}
+
 static void fl_view_class_init(FlViewClass* klass) {
   G_OBJECT_CLASS(klass)->constructed = fl_view_constructed;
   G_OBJECT_CLASS(klass)->set_property = fl_view_set_property;
@@ -347,6 +359,7 @@ static void fl_view_class_init(FlViewClass* klass) {
   GTK_WIDGET_CLASS(klass)->motion_notify_event = fl_view_motion_notify_event;
   GTK_WIDGET_CLASS(klass)->key_press_event = fl_view_key_press_event;
   GTK_WIDGET_CLASS(klass)->key_release_event = fl_view_key_release_event;
+  GTK_WIDGET_CLASS(klass)->draw = fl_view_draw_event;
 
   g_object_class_install_property(
       G_OBJECT_CLASS(klass), PROP_FLUTTER_PROJECT,
